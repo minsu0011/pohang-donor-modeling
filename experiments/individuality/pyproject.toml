@@ -1,0 +1,4 @@
+[project]
+name="pohang-stage1-individuality-atlas"
+version="1.0.0"
+requires-python=">=3.10"

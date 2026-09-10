@@ -1,0 +1,43 @@
+project:
+  name: POHANG_STAGE1_INDIVIDUALITY_ATLAS_V1
+  version: 20260814
+  seed: 42
+inputs:
+  core_zip: data/raw/POHANG_HANDOFF_V2_CORE_20260812.zip
+  core_extracted_dir: data/raw/POHANG_HANDOFF_V2_CORE_20260812/POHANG_HANDOFF_V2_CORE_20260812
+  allow_manifest_verified_core_fallback: true
+  expected_core_sha256: b63f1c04ca9a3db0c6be63d8ddc961ba333886767f288e0cf19547d34fe915c0
+  spend_member_suffix: integrated/kto_card_spend_monthly_district_category.csv
+  exclude_categories: [관광총소비]
+outputs:
+  dir: outputs/stage1_individuality_v1_full_7950x3d_5080_20260814
+stage1_labels:
+  minimum_history_months: 12
+  recent_months: 12
+  trend_months: 24
+  peer_divergence_high_quantile: 0.67
+  peer_divergence_low_quantile: 0.33
+  pooled_scope_max_individuality: 0.30
+  district_scope_min_individuality: 0.60
+  slope_stable_abs: 0.006
+  recent_shift_stable_abs: 0.08
+atlas:
+  minimum_pair_months: 24
+  recent_months: 24
+  weak_similarity_floor: 0.05
+  composite_weights:
+    district_shock_removed: 0.40
+    yoy: 0.30
+    recent_residual: 0.15
+    seasonal_shape: 0.15
+  linkage: average
+  annotate_abs_threshold: 0.48
+  dpi: 220
+  figsize: [21, 19]
+validation:
+  rolling_test_blocks:
+    - [202208, 202307]
+    - [202308, 202407]
+    - [202408, 202507]
+    - [202508, 202607]
+  minimum_train_months: 24

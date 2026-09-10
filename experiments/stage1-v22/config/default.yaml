@@ -1,0 +1,236 @@
+project:
+  name: POHANG_STAGE1_MULTIWINDOW_ORTHO_V22
+  seed: 42
+  version: 20260813
+inputs:
+  core_zip: data/raw/POHANG_HANDOFF_V2_CORE_20260812.zip
+  core_extracted_dir: ../data/raw/POHANG_HANDOFF_V2_CORE_20260812/POHANG_HANDOFF_V2_CORE_20260812
+  allow_manifest_verified_core_fallback: true
+  donor_v21_zip: data/raw/POHANG_DONOR_ABLATION_V21_RESULTS_20260812.zip
+  v1_reference_baseline: data/reference/V1_BASELINE_ALL_BACKENDS.csv
+  v1_reference_review: data/reference/V1_AUTONOMOUS_MASTER_REVIEW_KO.md
+  extracted_dir: .cache/extracted
+  expected_core_sha256: b63f1c04ca9a3db0c6be63d8ddc961ba333886767f288e0cf19547d34fe915c0
+  expected_donor_sha256: 4f7b7b307743e04254b025a8e563a34db329ea2c2132eabea5d942a3517418ff
+paths:
+  work_dir: .work
+  output_dir: outputs
+  cache_dir: .cache/tasks
+feature_build:
+  main_target_category_exclude:
+  - 관광총소비
+  heavy_rain_mm: 10.0
+  heatwave_max_c: 30.0
+  coldwave_min_c: 0.0
+  strict_completed_window_only: true
+  static_store_snapshot_in_historical_model: false
+validation:
+  rolling_test_blocks:
+  - - 202208
+    - 202307
+  - - 202308
+    - 202407
+  - - 202408
+    - 202507
+  - - 202508
+    - 202607
+  min_train_months: 24
+  inner_valid_months: 8
+  seeds_cpu:
+  - 42
+  - 137
+  seeds_gpu:
+  - 42
+  - 137
+category_baseline:
+  category_col: category
+  district_col: district
+  month_col: month
+  candidate_modes:
+  - category
+  - category_month
+  atlas_mode: category_month
+  alpha_category: 12.0
+  alpha_month: 8.0
+  alpha_district: 8.0
+  alpha_leaf: 5.0
+  minimum_category_history: 12
+  diagnostic_modes:
+  - category_district
+  - category_district_month
+residual_model:
+  canonical_sample_weight_mode: none
+  canonical_calibration_mode: none
+  recency_half_life_months: 24.0
+  recency_weight_floor: 0.2
+  challenger_profiles:
+  - name: canonical
+    sample_weight_mode: none
+    calibration_mode: none
+  - name: recency_weighted
+    sample_weight_mode: exponential_recency
+    calibration_mode: none
+  - name: linear_calibrated
+    sample_weight_mode: none
+    calibration_mode: linear
+  - name: recency_and_calibrated
+    sample_weight_mode: exponential_recency
+    calibration_mode: linear
+  category_reentry_profiles:
+  - strict_residual
+  - add_category
+  - add_category_major
+  - add_both_category_keys
+  - no_district
+  stage1_gain_min_median_r2: 0.01
+  stage1_gain_min_positive_fold_share: 0.75
+  residual_r2_min_median: 0.01
+  category_reentry_max_gain: 0.01
+  recent_fold_v1_tolerance: 0.03
+  calibration_slope_min: 0.7
+  calibration_slope_max: 1.3
+  canonical_prediction_backend: CPU
+  category_proxy_recovery_max_share: 0.8
+  interaction_excess_min_r2: 0.001
+  backend_gain_sign_required: true
+catboost:
+  iterations: 900
+  quick_iterations: 180
+  learning_rate: 0.04
+  depth: 7
+  l2_leaf_reg: 6.0
+  random_strength: 0.5
+  early_stopping_rounds: 80
+  gpu_devices: '0'
+  gpu_ram_part: 0.9
+  used_ram_limit: 72gb
+hardware:
+  mode: hybrid
+  cpu_workers: 2
+  cpu_threads_per_model: 3
+  gpu_host_threads: 2
+  fail_if_gpu_requested_but_unavailable: true
+  exhaustive_feature_shards: 2
+correlation:
+  max_features_per_full_map: 64
+  max_representatives_main: 42
+  max_representatives_other: 30
+  max_concept_features_per_page: 38
+  annotate_threshold: 0.48
+  figure_dpi: 220
+  concept_detail_dpi: 155
+  low_pair_reliability_n: 48
+  concept_block_quantile: 0.75
+  redundancy_threshold: 0.94
+  cluster_linkage: average
+  font_candidates:
+  - Malgun Gothic
+  - AppleGothic
+  - Noto Sans CJK KR
+  - NanumGothic
+  - DejaVu Sans
+  reliability_shrink_n: 30
+  strong_redundancy_threshold: 0.97
+separation:
+  enabled: true
+  minimum_rows: 48
+  spline_knots: 5
+  ridge_alpha: 6.0
+  categorical_smoothing: 20.0
+  top_n_plot: 45
+  minimum_test_rows: 24
+  weight_oof_r2: 0.45
+  weight_abs_spearman: 0.25
+  weight_positive_fold_share: 0.15
+  weight_sign_stability: 0.15
+ablation:
+  cache_tasks: true
+  redundancy_cluster_threshold: 0.94
+  group_r2_keep_threshold: 0.01
+  group_r2_conditional_threshold: 0.003
+  feature_r2_keep_threshold: 0.003
+  feature_r2_conditional_threshold: 0.0008
+  positive_run_share_keep: 0.67
+  run_cpu_all_features: true
+  run_gpu_groups_and_redundancy: true
+screening:
+  ranking_scenarios:
+    economic_efficiency:
+      spend_gap_proxy: 0.28
+      demand: 0.22
+      capacity: 0.2
+      diversity: 0.12
+      connection_proxy: 0.1
+      uncertainty: -0.08
+    spatial_spread:
+      spend_gap_proxy: 0.2
+      demand: 0.15
+      capacity: 0.15
+      diversity: 0.1
+      connection_proxy: 0.3
+      uncertainty: -0.1
+    traditional_market:
+      spend_gap_proxy: 0.22
+      demand: 0.15
+      capacity: 0.18
+      diversity: 0.1
+      market_bonus: 0.25
+      uncertainty: -0.1
+    offseason_learning:
+      spend_gap_proxy: 0.25
+      demand: 0.15
+      capacity: 0.15
+      diversity: 0.1
+      offseason_bonus: 0.25
+      uncertainty: -0.1
+feature_gate:
+  separation_conditional: 0.2
+  separation_strong: 0.42
+  direct_delta_conditional: 0.0008
+  direct_delta_strong: 0.003
+  low_power_rows: 60
+hardware_v22:
+  cpu_workers: 4
+  cpu_threads_per_model: 6
+  gpu_host_threads: 6
+  gpu_ram_part: 0.9
+  selection_cpu_workers: 6
+  selection_threads_per_model: 4
+orthogonal_interactions:
+  category_mean_alpha: 12.0
+  include_weather_orthogonal: true
+  encoding: dense_category_conditioned_deviation
+  block_raw_sparse_from_canonical: true
+stage1_v22_selection:
+  inner_window_count: 3
+  inner_valid_months: 4
+  inner_step_months: 4
+  inner_min_train_months: 12
+  top_k_stage1_candidates: 4
+  screen_iterations: 72
+  screen_workers: 6
+  screen_threads_per_model: 4
+  screen_seed: 4242
+  desired_inner_stage2_gain: 0.01
+  desired_inner_category_reentry_max: 0.005
+  desired_inner_category_reentry_worst_max: 0.01
+  desired_inner_age_industry_drop: 0.003
+  desired_inner_proxy_excess_min: 0.0
+  quick_inner_window_count: 2
+  quick_inner_valid_months: 3
+  quick_top_k_stage1_candidates: 2
+  quick_screen_iterations: 24
+  quick_screen_workers: 2
+  quick_audit_iterations: 12
+stage1_v22_gate:
+  category_reentry_cpu_max_median_delta_r2: 0.005
+  category_reentry_cpu_max_worst_fold_delta_r2: 0.01
+  proxy_interaction_excess_min: 0.0
+  proxy_improvement_min: 0.0
+  require_all_backends_all_folds_positive_stage2_gain: true
+  cpu_median_stage2_gain_min: 0.01
+  latest_cpu_fold_r2_min: 0.826
+  age_industry_min_delta_r2: 0.003
+  age_industry_reference_retention_fraction: 0.5
+  age_industry_positive_run_share_min: 0.75
+  future_target_violation_max: 0

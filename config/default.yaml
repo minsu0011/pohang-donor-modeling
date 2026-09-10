@@ -1,0 +1,50 @@
+project:
+  random_seed: 42
+  quick: false
+  output_run_name: donor_aux_run
+
+inputs:
+  core_zip: data/raw/POHANG_HANDOFF_V2_CORE_20260812.zip
+  seoul_zip: data/raw/POHANG_HANDOFF_V2_SEOUL_DONOR_20260812.zip
+  extracted_dir: work/extracted
+
+model:
+  backend: catboost
+  task_type: CPU
+  iterations: 450
+  quick_iterations: 100
+  learning_rate: 0.05
+  depth: 7
+  l2_leaf_reg: 5.0
+  early_stopping_rounds: 50
+  verbose: false
+  thread_count: -1
+  ablation_parallel_jobs: 4
+  used_ram_limit: 24gb
+  devices: "0"
+  gpu_ram_part: 0.90
+  pinned_memory_size: 2gb
+
+validation:
+  gyeonggi_test_months: 12
+  seoul_test_quarters: 4
+  max_permutation_rows: 5000
+  correlation_max_rows: 20000
+  quick_correlation_max_rows: 5000
+
+seoul:
+  cluster_k_min: 4
+  cluster_k_max: 8
+  latest_quarters_for_clustering: 4
+  quick_max_districts: 500
+  excluded_target_transitions:
+    - "20234->20241"
+
+feature_gate:
+  accept_threshold: 0.60
+  conditional_threshold: 0.42
+  weights:
+    importance: 0.35
+    stability: 0.30
+    coverage: 0.20
+    evidence_quality: 0.15

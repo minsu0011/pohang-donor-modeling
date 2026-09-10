@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pohang-stage2-adaptive-abstention-v3"
+version = "3.0.0"
+description = "Pohang frozen Season-Hybrid Stage1 plus adaptive residual Stage2 selector with abstention"
+requires-python = ">=3.10"
+dependencies = [
+  "pandas>=2.2", "numpy>=1.26", "scipy>=1.12", "scikit-learn>=1.5",
+  "catboost>=1.2.7", "matplotlib>=3.9", "PyYAML>=6.0", "networkx>=3.3", "joblib>=1.4"
+]
+
+[project.scripts]
+pohang-main-v2 = "pohang_main_v2.cli:main"
+pohang-stage1-scope-v1 = "pohang_stage1_scope_v1.cli:main"
+pohang-stage1-season-v2 = "pohang_stage1_season_v2.cli:main"
+pohang-stage2-adaptive-v3 = "pohang_stage2_adaptive_v3.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+[tool.setuptools.packages.find]
+where = ["src"]

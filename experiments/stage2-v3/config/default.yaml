@@ -1,0 +1,276 @@
+project:
+  name: POHANG_STAGE1_DISTRICT_SEASON_V2
+  version: 20260814
+  seed: 42
+inputs:
+  core_zip: data/raw/POHANG_HANDOFF_V2_CORE_20260812.zip
+  core_extracted_dir: data/raw/POHANG_HANDOFF_V2_CORE_20260812/POHANG_HANDOFF_V2_CORE_20260812
+  allow_manifest_verified_core_fallback: true
+  donor_v21_zip: data/raw/POHANG_DONOR_ABLATION_V21_RESULTS_20260812.zip
+  expected_donor_sha256: 4f7b7b307743e04254b025a8e563a34db329ea2c2132eabea5d942a3517418ff
+  extracted_dir: .cache/extracted
+  expected_core_sha256: b63f1c04ca9a3db0c6be63d8ddc961ba333886767f288e0cf19547d34fe915c0
+paths:
+  work_dir: .work
+  output_dir: outputs
+  cache_dir: .cache/tasks
+feature_build:
+  main_target_category_exclude:
+  - 관광총소비
+  heavy_rain_mm: 10.0
+  heatwave_max_c: 30.0
+  coldwave_min_c: 0.0
+  strict_completed_window_only: true
+  static_store_snapshot_in_historical_model: false
+validation:
+  rolling_test_blocks:
+  - - 202208
+    - 202307
+  - - 202308
+    - 202407
+  - - 202408
+    - 202507
+  - - 202508
+    - 202607
+  min_train_months: 24
+  inner_valid_months: 8
+  seeds_cpu:
+  - 42
+  - 137
+  seeds_gpu:
+  - 42
+  - 137
+category_baseline:
+  category_col: category
+  district_col: district
+  month_col: month
+  candidate_modes:
+  - category
+  - category_month
+  atlas_mode: category_month
+  alpha_category: 12.0
+  alpha_month: 8.0
+  alpha_district: 8.0
+  alpha_leaf: 5.0
+  minimum_category_history: 12
+residual_model:
+  canonical_sample_weight_mode: none
+  canonical_calibration_mode: none
+catboost:
+  iterations: 1100
+  quick_iterations: 100
+  learning_rate: 0.035
+  depth: 7
+  l2_leaf_reg: 7.0
+  random_strength: 0.45
+  early_stopping_rounds: 90
+  gpu_devices: '0'
+  gpu_ram_part: 0.92
+  used_ram_limit: 80gb
+hardware:
+  mode: hybrid
+  cpu_workers: 3
+  cpu_threads_per_model: 8
+  gpu_host_threads: 8
+  fail_if_gpu_requested_but_unavailable: true
+  exhaustive_feature_shards: 2
+hardware_scope_v1:
+  selection_workers: 12
+  cpu_workers: 3
+  cpu_threads_per_model: 8
+  gpu_host_threads: 8
+  gpu_ram_part: 0.92
+  host_ram_hint_gb: 80
+individuality:
+  recent_months: 24
+  trend_months: 24
+  minimum_history_months: 12
+  minimum_pair_months: 18
+  composite_weights:
+    district_shock_removed: 0.4
+    yoy: 0.3
+    recent_residual: 0.15
+    seasonal_shape: 0.15
+  weak_similarity_floor: 0.05
+  pooled_scope_max_individuality: 0.3
+  district_scope_min_individuality: 0.6
+  district_scope_min_confidence: 0.7
+  peer_divergence_low_quantile: 0.33
+  peer_divergence_high_quantile: 0.67
+competition:
+  inner_window_count: 3
+  inner_valid_months: 6
+  inner_min_train_months: 18
+  shrink_alpha: 12.0
+  worst_rmse_weight: 0.35
+  shrink_complexity_penalty: 0.006
+  district_complexity_penalty: 0.015
+  label_prior_bonus: 0.004
+  min_rmse_improvement: 0.003
+  shrink_min_confidence: 0.4
+  district_min_confidence: 0.7
+  district_min_adjusted_individuality: 0.52
+stage2_eval:
+  inner_valid_months: 8
+  minimum_category_history: 12
+  profiles:
+  - ALL_POOLED
+  - SEASON_HYBRID_NO_PRIOR
+  - SEASON_HYBRID_V2
+  quick_profiles:
+  - SEASON_HYBRID_V2
+gates:
+  stage1_median_r2_gain_min: 0.001
+  latest_fold_tolerance: 0.005
+  end_to_end_tolerance: 0.003
+correlation:
+  max_features_per_full_map: 64
+  max_representatives_main: 42
+  max_representatives_other: 30
+  max_concept_features_per_page: 38
+  annotate_threshold: 0.48
+  figure_dpi: 220
+  concept_detail_dpi: 155
+  low_pair_reliability_n: 48
+  concept_block_quantile: 0.75
+  redundancy_threshold: 0.94
+  cluster_linkage: average
+  reliability_shrink_n: 30
+  strong_redundancy_threshold: 0.97
+separation:
+  enabled: true
+  minimum_rows: 48
+  spline_knots: 5
+  ridge_alpha: 6.0
+  categorical_smoothing: 20.0
+  top_n_plot: 45
+  minimum_test_rows: 24
+  weight_oof_r2: 0.45
+  weight_abs_spearman: 0.25
+  weight_positive_fold_share: 0.15
+  weight_sign_stability: 0.15
+ablation:
+  cache_tasks: true
+  redundancy_cluster_threshold: 0.94
+  group_r2_keep_threshold: 0.01
+  group_r2_conditional_threshold: 0.003
+  feature_r2_keep_threshold: 0.003
+  feature_r2_conditional_threshold: 0.0008
+  positive_run_share_keep: 0.67
+screening:
+  ranking_scenarios:
+    economic_efficiency:
+      spend_gap_proxy: 0.28
+      demand: 0.22
+      capacity: 0.2
+      diversity: 0.12
+      connection_proxy: 0.1
+      uncertainty: -0.08
+    spatial_spread:
+      spend_gap_proxy: 0.2
+      demand: 0.15
+      capacity: 0.15
+      diversity: 0.1
+      connection_proxy: 0.3
+      uncertainty: -0.1
+feature_gate:
+  separation_conditional: 0.2
+  separation_strong: 0.42
+  direct_delta_conditional: 0.0008
+  direct_delta_strong: 0.003
+  low_power_rows: 60
+orthogonal_interactions:
+  category_mean_alpha: 12.0
+  include_weather_orthogonal: true
+  encoding: dense_category_conditioned_deviation
+  block_raw_sparse_from_canonical: true
+hardware_season_v2:
+  selection_workers: 16
+  cpu_workers: 3
+  cpu_threads_per_model: 8
+  gpu_host_threads: 8
+  gpu_ram_part: 0.92
+  host_ram_hint_gb: 80
+seasonality:
+  target_col: target_log_spend
+  minimum_pair_months: 18
+  level_shrink_alpha: 12.0
+  season_shrink_alpha: 18.0
+  season_prior_categories:
+  - 골프장
+  - 일반외식업
+  - 레저용품쇼핑
+  - 대형쇼핑몰
+  - 제과음료업
+  - 기타관광쇼핑
+  - 기타레저
+competition_v2:
+  inner_window_count: 3
+  inner_valid_months: 6
+  inner_min_train_months: 18
+  legacy_shrink_alpha: 12.0
+  worst_rmse_weight: 0.35
+  level_complexity_penalty: 0.003
+  legacy_complexity_penalty: 0.006
+  season_complexity_penalty: 0.008
+  full_complexity_penalty: 0.02
+  season_prior_bonus: 0.001
+  season_prior_gain_relaxation: 0.0005
+  min_rmse_improvement: 0.0015
+  season_min_rmse_improvement: 0.0015
+  shrink_min_confidence: 0.35
+  season_min_confidence: 0.5
+  season_min_signal: 0.05
+  worst_window_tolerance: 0.003
+  season_worst_window_tolerance: 0.002
+  current_v1_full_scope_allowed: true
+  full_min_confidence_v1: 0.7
+  full_min_adjusted_individuality_v1: 0.52
+  full_scope_canonical_allowed: true
+  full_min_confidence: 0.9
+  full_min_season_confidence: 0.85
+  full_min_season_signal: 0.18
+  full_min_adjusted_individuality: 0.6
+  full_min_rmse_improvement: 0.008
+  full_worst_window_tolerance: 0.0005
+gates_v2:
+  stage1_current_tolerance: 0.0015
+  latest_fold_tolerance: 0.003
+  season_stage1_gain_min: 0.0005
+  season_no_prior_gain_min: 0.0
+  end_to_end_tolerance: 0.003
+
+stage2_adaptive:
+  short_window_count: 4
+  quick_short_window_count: 2
+  short_window_months: 4
+  long_window_months: 8
+  inner_min_train_months: 8
+  minimum_inner_windows: 3
+  correction_lambdas: [0.25, 0.50, 0.75, 1.00]
+  phase_b_top_n: 2
+  screen_seed: 4242
+  gpu_shadow_enabled: true
+  gpu_shadow_worst_gain_min: -0.003
+  selection_gate:
+    median_gain_min: 0.002
+    positive_share_min: 0.75
+    worst_gain_min: -0.002
+    std_penalty: 0.50
+    negative_worst_penalty: 1.50
+
+hardware_stage2_v3:
+  linear_workers: 12
+  cpu_catboost_workers: 3
+  cpu_threads_per_catboost: 8
+  gpu_host_threads: 8
+  gpu_ram_part: 0.92
+  used_ram_limit: 80gb
+  host_ram_hint_gb: 80
+
+stage2_adaptive_gates:
+  stage1_repro_abs_tolerance: 0.000001
+  median_noninferiority_tolerance: 0.001
+  worst_fold_harm_limit: 0.003
+  latest_fold_r2_min: 0.84
+  expected_oof_rows: 1568
