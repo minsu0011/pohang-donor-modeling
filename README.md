@@ -76,4 +76,6 @@ python -m pohang_donor_models.cli --help
 python -m pytest tests -q
 ```
 
-실제 donor 계산에는 `config/default.yaml`에 맞는 입력 ZIP이 필요합니다. [상세 개발 과정](docs/wiki/Development-Journey.md), [모델별 역할](docs/wiki/Model-Evolution.md), [병목과 해결](docs/wiki/Bottlenecks-and-Solutions.md), [결과 해석](docs/wiki/Validation-and-Results.md)을 이어서 볼 수 있습니다.
+실제 donor 계산에는 `config/default.yaml`에 맞는 입력 ZIP이 필요합니다. [상세 개발 과정](https://github.com/minsu0011/pohang-donor-modeling/wiki/Development-Journey), [모델별 역할](https://github.com/minsu0011/pohang-donor-modeling/wiki/Model-Evolution), [병목과 해결](https://github.com/minsu0011/pohang-donor-modeling/wiki/Bottlenecks-and-Solutions), [결과 해석](https://github.com/minsu0011/pohang-donor-modeling/wiki/Validation-and-Results)을 이어서 볼 수 있습니다.
+
+[Wiki 전체 보기](https://github.com/minsu0011/pohang-donor-modeling/wiki) · [저장소 내 문서 사본](docs/wiki/Home.md)
